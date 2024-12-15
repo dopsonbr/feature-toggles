@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(groups);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to fetch groups' }, { status: 500 });
   }
 }
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(group, { status: 201 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to create group' }, { status: 500 });
   }
 }
@@ -41,6 +43,7 @@ export async function PUT(request: NextRequest) {
     });
     return NextResponse.json(group);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to update group' }, { status: 500 });
   }
 }
@@ -57,6 +60,7 @@ export async function DELETE(request: NextRequest) {
     });
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to delete group' }, { status: 500 });
   }
 }

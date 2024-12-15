@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(environments);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to fetch environments' }, { status: 500 });
   }
 }
@@ -23,6 +24,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(environment, { status: 201 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to create environment' }, { status: 500 });
   }
 }
@@ -39,6 +41,7 @@ export async function PUT(request: NextRequest) {
     });
     return NextResponse.json(environment);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to update environment' }, { status: 500 });
   }
 }
@@ -55,6 +58,7 @@ export async function DELETE(request: NextRequest) {
     });
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to delete environment' }, { status: 500 });
   }
 }

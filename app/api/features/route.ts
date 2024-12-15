@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(features);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to fetch features' }, { status: 500 });
   }
 }
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(feature, { status: 201 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to create feature' }, { status: 500 });
   }
 }
@@ -45,6 +47,7 @@ export async function PUT(request: NextRequest) {
     });
     return NextResponse.json(feature);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to update feature' }, { status: 500 });
   }
 }
@@ -61,6 +64,7 @@ export async function DELETE(request: NextRequest) {
     });
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to delete feature' }, { status: 500 });
   }
 }
