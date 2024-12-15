@@ -1,101 +1,203 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { Button } from './components/Button';
+import { Input, TextArea, Toggle } from './components/Form';
+import { Table, TableRow, TableCell, TableActions } from './components/Table';
+import { api } from './utils/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+interface Feature {
+  id: string;
+  type: string;
+  owner: string;
+  name: string;
+  description: string | null;
+  enabled: boolean;
+  createTs: string;
+}
+
+interface FeatureFormData {
+  id?: string;
+  type: string;
+  owner: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+}
+
+export default function FeaturesPage() {
+  const queryClient = useQueryClient();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingFeature, setEditingFeature] = useState<Feature | null>(null);
+  const [formData, setFormData] = useState<FeatureFormData>({
+    type: '',
+    owner: '',
+    name: '',
+    description: '',
+    enabled: false,
+  });
+
+  const { data: features = [], isLoading } = useQuery({
+    queryKey: ['features'],
+    queryFn: api.getFeatures,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: api.createFeature,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['features'] });
+      resetForm();
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: api.updateFeature,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['features'] });
+      resetForm();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: api.deleteFeature,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['features'] });
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      type: '',
+      owner: '',
+      name: '',
+      description: '',
+      enabled: false,
+    });
+    setEditingFeature(null);
+    setIsFormOpen(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingFeature) {
+      updateMutation.mutate({ ...formData, id: editingFeature.id });
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
+  const handleEdit = (feature: Feature) => {
+    setEditingFeature(feature);
+    setFormData({
+      type: feature.type,
+      owner: feature.owner,
+      name: feature.name,
+      description: feature.description || '',
+      enabled: feature.enabled,
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this feature?')) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="page-title">Features</h1>
+        <Button onClick={() => setIsFormOpen(true)}>Add Feature</Button>
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      {isFormOpen && (
+        <div className="card">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <Input
+              label="Type"
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              required
+            />
+            <Input
+              label="Owner"
+              value={formData.owner}
+              onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
+              required
+            />
+            <TextArea
+              label="Description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+            <Toggle
+              label="Enabled"
+              checked={formData.enabled}
+              onChange={(e) => setFormData({ ...formData, enabled: e.target.checked })}
+            />
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="secondary" onClick={resetForm}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {editingFeature ? 'Update' : 'Create'} Feature
+              </Button>
+            </div>
+          </form>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      )}
+
+      <div className="card">
+        <Table
+          headers={['Name', 'Type', 'Owner', 'Description', 'Status', 'Actions']}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {features.map((feature: Feature) => (
+            <TableRow key={feature.id}>
+              <TableCell>{feature.name}</TableCell>
+              <TableCell>{feature.type}</TableCell>
+              <TableCell>{feature.owner}</TableCell>
+              <TableCell>{feature.description}</TableCell>
+              <TableCell>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    feature.enabled
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {feature.enabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </TableCell>
+              <TableActions>
+                <Button
+                  variant="secondary"
+                  onClick={() => handleEdit(feature)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => handleDelete(feature.id)}
+                >
+                  Delete
+                </Button>
+              </TableActions>
+            </TableRow>
+          ))}
+        </Table>
+      </div>
     </div>
   );
 }

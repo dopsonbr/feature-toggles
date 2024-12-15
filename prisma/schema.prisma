@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Feature {
+  id          String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type        String                      @db.VarChar(50)
+  owner       String                      @db.VarChar(100)
+  name        String                      @unique @db.VarChar(100)
+  description String?
+  enabled     Boolean                     @default(false)
+  createTs    DateTime                    @default(now()) @map("create_ts") @db.Timestamptz
+  toggles     ActiveGroupFeatureToggle[]
+
+  @@map("features")
+}
+
+model Product {
+  id          String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String                      @unique @db.VarChar(100)
+  description String?
+  owner       String                      @db.VarChar(100)
+  createTs    DateTime                    @default(now()) @map("create_ts") @db.Timestamptz
+  toggles     ActiveGroupFeatureToggle[]
+
+  @@map("products")
+}
+
+model Environment {
+  id          String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String                      @unique @db.VarChar(100)
+  description String?
+  createTs    DateTime                    @default(now()) @map("create_ts") @db.Timestamptz
+  toggles     ActiveGroupFeatureToggle[]
+
+  @@map("environments")
+}
+
+model Group {
+  id          String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String                      @unique @db.VarChar(100)
+  description String?
+  owner       String                      @db.VarChar(100)
+  createTs    DateTime                    @default(now()) @map("create_ts") @db.Timestamptz
+  toggles     ActiveGroupFeatureToggle[]
+
+  @@map("groups")
+}
+
+model ActiveGroupFeatureToggle {
+  featureId     String      @map("feature_id") @db.Uuid
+  groupId       String      @map("group_id") @db.Uuid
+  productId     String      @map("product_id") @db.Uuid
+  environmentId String      @map("environment_id") @db.Uuid
+  createTs      DateTime    @default(now()) @map("create_ts") @db.Timestamptz
+  feature       Feature     @relation(fields: [featureId], references: [id])
+  group         Group       @relation(fields: [groupId], references: [id])
+  product       Product     @relation(fields: [productId], references: [id])
+  environment   Environment @relation(fields: [environmentId], references: [id])
+
+  @@id([featureId, groupId, productId, environmentId])
+  @@map("active_group_feature_toggles")
+}

@@ -1,0 +1,84 @@
+{
+    "features": [
+      {
+        "id": "123e4567-e89b-12d3-a456-426614174000",
+        "type": "BOOLEAN",
+        "owner": "jane.doe@company.com",
+        "name": "dark_mode_enabled",
+        "description": "Toggle for enabling dark mode across the application",
+        "enabled": true,
+        "create_ts": "2024-12-15T10:00:00Z"
+      },
+      {
+        "id": "987fcdeb-51d3-12d3-a456-426614174001",
+        "type": "PERCENTAGE",
+        "owner": "john.smith@company.com",
+        "name": "new_checkout_flow",
+        "description": "Gradual rollout of the new checkout experience",
+        "enabled": false,
+        "create_ts": "2024-12-14T15:30:00Z"
+      }
+    ],
+    "products": [
+      {
+        "id": "456e789f-e89b-12d3-a456-426614174002",
+        "name": "E-Commerce Platform",
+        "description": "Main shopping platform for customers",
+        "owner": "product.team@company.com",
+        "create_ts": "2024-12-01T09:00:00Z"
+      },
+      {
+        "id": "789abcde-e89b-12d3-a456-426614174003",
+        "name": "Admin Dashboard",
+        "description": "Internal tools for managing the platform",
+        "owner": "admin.team@company.com",
+        "create_ts": "2024-12-02T14:20:00Z"
+      }
+    ],
+    "environments": [
+      {
+        "id": "345bcdef-e89b-12d3-a456-426614174004",
+        "name": "development",
+        "description": "Development environment for testing new features",
+        "create_ts": "2024-12-01T08:00:00Z"
+      },
+      {
+        "id": "567efghi-e89b-12d3-a456-426614174005",
+        "name": "production",
+        "description": "Production environment for end users",
+        "create_ts": "2024-12-01T08:00:00Z"
+      }
+    ],
+    "groups": [
+      {
+        "id": "234cdefg-e89b-12d3-a456-426614174006",
+        "name": "beta_testers",
+        "description": "Early access users for feature testing",
+        "owner": "beta.program@company.com",
+        "create_ts": "2024-12-10T11:00:00Z"
+      },
+      {
+        "id": "890hijkl-e89b-12d3-a456-426614174007",
+        "name": "premium_users",
+        "description": "Users with premium subscription",
+        "owner": "premium.support@company.com",
+        "create_ts": "2024-12-11T13:45:00Z"
+      }
+    ],
+    "active_group_feature_toggles": [
+      {
+        "feature_id": "123e4567-e89b-12d3-a456-426614174000",
+        "group_id": "234cdefg-e89b-12d3-a456-426614174006",
+        "product_id": "456e789f-e89b-12d3-a456-426614174002",
+        "environment_id": "345bcdef-e89b-12d3-a456-426614174004",
+        "create_ts": "2024-12-15T12:00:00Z"
+      },
+      {
+        "feature_id": "987fcdeb-51d3-12d3-a456-426614174001",
+        "group_id": "890hijkl-e89b-12d3-a456-426614174007",
+        "product_id": "789abcde-e89b-12d3-a456-426614174003",
+        "environment_id": "567efghi-e89b-12d3-a456-426614174005",
+        "create_ts": "2024-12-15T12:30:00Z"
+      }
+    ]
+  }
