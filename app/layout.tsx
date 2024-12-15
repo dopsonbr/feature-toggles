@@ -1,24 +1,15 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { Layout } from "./components/Layout";
-import { Providers } from "./providers";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Feature Toggles",
-  description: "Feature toggle management system",
-};
+import { Layout } from './components/Layout';
+import { Providers } from './providers';
+import './globals.css';
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         <Providers>
           <Layout>{children}</Layout>
         </Providers>

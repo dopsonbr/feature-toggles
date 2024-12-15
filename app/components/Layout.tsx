@@ -7,7 +7,8 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const navItems = [
-    { href: '/', label: 'Features' },
+    { href: '/', label: 'Toggles' },
+    { href: '/features', label: 'Features' },
     { href: '/products', label: 'Products' },
     { href: '/environments', label: 'Environments' },
     { href: '/groups', label: 'Groups' },
