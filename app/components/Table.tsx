@@ -10,6 +10,7 @@ interface TableProps {
 interface TableRowProps {
   children: ReactNode;
   className?: string;
+  onClick?: () => void;
 }
 
 export function Table({ headers, children, className }: TableProps) {
@@ -37,9 +38,12 @@ export function Table({ headers, children, className }: TableProps) {
   );
 }
 
-export function TableRow({ children, className }: TableRowProps) {
+export function TableRow({ children, className, onClick }: TableRowProps) {
   return (
-    <tr className={twMerge("hover:bg-gray-50", className)}>
+    <tr 
+      className={twMerge("hover:bg-gray-50", className)}
+      onClick={onClick}
+    >
       {children}
     </tr>
   );

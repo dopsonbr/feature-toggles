@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from './components/Button';
 import { Input, TextArea, Toggle } from './components/Form';
 import { Table, TableRow, TableCell, TableActions } from './components/Table';
+import { FeatureToggles } from './components/FeatureToggles';
 import { api } from './utils/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -30,6 +31,7 @@ export default function FeaturesPage() {
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingFeature, setEditingFeature] = useState<Feature | null>(null);
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [formData, setFormData] = useState<FeatureFormData>({
     type: '',
     owner: '',
@@ -63,6 +65,7 @@ export default function FeaturesPage() {
     mutationFn: api.deleteFeature,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['features'] });
+      setSelectedFeature(null);
     },
   });
 
@@ -105,6 +108,10 @@ export default function FeaturesPage() {
     }
   };
 
+  const handleFeatureClick = (feature: Feature) => {
+    setSelectedFeature(selectedFeature?.id === feature.id ? null : feature);
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -112,12 +119,12 @@ export default function FeaturesPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="page-title">Features</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Features</h1>
         <Button onClick={() => setIsFormOpen(true)}>Add Feature</Button>
       </div>
 
       {isFormOpen && (
-        <div className="card">
+        <div className="bg-white shadow rounded-lg p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Name"
@@ -159,42 +166,60 @@ export default function FeaturesPage() {
         </div>
       )}
 
-      <div className="card">
+      <div className="bg-white shadow rounded-lg">
         <Table
           headers={['Name', 'Type', 'Owner', 'Description', 'Status', 'Actions']}
         >
           {features.map((feature: Feature) => (
-            <TableRow key={feature.id}>
-              <TableCell>{feature.name}</TableCell>
-              <TableCell>{feature.type}</TableCell>
-              <TableCell>{feature.owner}</TableCell>
-              <TableCell>{feature.description}</TableCell>
-              <TableCell>
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    feature.enabled
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}
-                >
-                  {feature.enabled ? 'Enabled' : 'Disabled'}
-                </span>
-              </TableCell>
-              <TableActions>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleEdit(feature)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => handleDelete(feature.id)}
-                >
-                  Delete
-                </Button>
-              </TableActions>
-            </TableRow>
+            <React.Fragment key={feature.id}>
+              <TableRow 
+                className={`cursor-pointer ${selectedFeature?.id === feature.id ? 'bg-blue-50' : ''}`}
+                onClick={() => handleFeatureClick(feature)}
+              >
+                <TableCell>{feature.name}</TableCell>
+                <TableCell>{feature.type}</TableCell>
+                <TableCell>{feature.owner}</TableCell>
+                <TableCell>{feature.description}</TableCell>
+                <TableCell>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      feature.enabled
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {feature.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                </TableCell>
+                <TableActions>
+                  <Button
+                    variant="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(feature);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(feature.id);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </TableActions>
+              </TableRow>
+              {selectedFeature?.id === feature.id && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 bg-gray-50">
+                    <FeatureToggles featureId={feature.id} />
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
           ))}
         </Table>
       </div>

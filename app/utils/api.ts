@@ -101,4 +101,29 @@ export const api = {
     fetch(`${BASE_URL}/groups?id=${id}`, {
       method: 'DELETE',
     }).then(handleResponse),
+
+  // Feature Toggles
+  getToggles: (params?: { featureId?: string; groupId?: string; productId?: string; environmentId?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.featureId) searchParams.append('featureId', params.featureId);
+    if (params?.groupId) searchParams.append('groupId', params.groupId);
+    if (params?.productId) searchParams.append('productId', params.productId);
+    if (params?.environmentId) searchParams.append('environmentId', params.environmentId);
+    
+    return fetch(`${BASE_URL}/toggles?${searchParams}`).then(handleResponse);
+  },
+  
+  createToggle: (data: { featureId: string; groupId: string; productId: string; environmentId: string }) =>
+    fetch(`${BASE_URL}/toggles`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+  
+  deleteToggle: (params: { featureId: string; groupId: string; productId: string; environmentId: string }) => {
+    const searchParams = new URLSearchParams(params as Record<string, string>);
+    return fetch(`${BASE_URL}/toggles?${searchParams}`, {
+      method: 'DELETE',
+    }).then(handleResponse);
+  },
 };
