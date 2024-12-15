@@ -57,6 +57,46 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { oldData, newData } = body;
+
+    // Delete the old toggle
+    await prisma.activeGroupFeatureToggle.delete({
+      where: {
+        featureId_groupId_productId_environmentId: {
+          featureId: oldData.featureId,
+          groupId: oldData.groupId,
+          productId: oldData.productId,
+          environmentId: oldData.environmentId
+        }
+      }
+    });
+
+    // Create the new toggle
+    const toggle = await prisma.activeGroupFeatureToggle.create({
+      data: {
+        featureId: newData.featureId,
+        groupId: newData.groupId,
+        productId: newData.productId,
+        environmentId: newData.environmentId,
+      },
+      include: {
+        feature: true,
+        group: true,
+        product: true,
+        environment: true,
+      }
+    });
+
+    return NextResponse.json(toggle);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to update toggle' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

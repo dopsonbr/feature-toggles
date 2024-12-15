@@ -119,6 +119,14 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     }).then(handleResponse),
+
+  updateToggle: (oldData: { featureId: string; groupId: string; productId: string; environmentId: string }, 
+                newData: { featureId: string; groupId: string; productId: string; environmentId: string }) =>
+    fetch(`${BASE_URL}/toggles`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ oldData, newData }),
+    }).then(handleResponse),
   
   deleteToggle: (params: { featureId: string; groupId: string; productId: string; environmentId: string }) => {
     const searchParams = new URLSearchParams(params as Record<string, string>);

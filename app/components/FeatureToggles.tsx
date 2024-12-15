@@ -56,6 +56,8 @@ interface FeatureTogglesProps {
 export function FeatureToggles({ featureId }: FeatureTogglesProps) {
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingToggle, setEditingToggle] = useState<Toggle | null>(null);
   const [formData, setFormData] = useState<ToggleFormData>({
     groupId: '',
     productId: '',
@@ -91,6 +93,15 @@ export function FeatureToggles({ featureId }: FeatureTogglesProps) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: (data: { oldData: Toggle; newData: ToggleFormData & { featureId: string } }) =>
+      api.updateToggle(data.oldData, data.newData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['toggles', featureId] });
+      resetForm();
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (toggle: Toggle) =>
       api.deleteToggle({
@@ -111,11 +122,31 @@ export function FeatureToggles({ featureId }: FeatureTogglesProps) {
       environmentId: '',
     });
     setIsFormOpen(false);
+    setIsEditMode(false);
+    setEditingToggle(null);
+  };
+
+  const handleEdit = (toggle: Toggle) => {
+    setIsEditMode(true);
+    setEditingToggle(toggle);
+    setFormData({
+      groupId: toggle.groupId,
+      productId: toggle.productId,
+      environmentId: toggle.environmentId,
+    });
+    setIsFormOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate(formData);
+    if (isEditMode && editingToggle) {
+      updateMutation.mutate({
+        oldData: editingToggle,
+        newData: { ...formData, featureId },
+      });
+    } else {
+      createMutation.mutate(formData);
+    }
   };
 
   const handleDelete = (toggle: Toggle) => {
@@ -132,7 +163,9 @@ export function FeatureToggles({ featureId }: FeatureTogglesProps) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-medium">Feature Toggles</h2>
-        <Button onClick={() => setIsFormOpen(true)}>Add Toggle</Button>
+        {!isFormOpen && (
+          <Button onClick={() => setIsFormOpen(true)}>Add Toggle</Button>
+        )}
       </div>
 
       {isFormOpen && (
@@ -199,7 +232,7 @@ export function FeatureToggles({ featureId }: FeatureTogglesProps) {
               <Button type="button" variant="secondary" onClick={resetForm}>
                 Cancel
               </Button>
-              <Button type="submit">Add Toggle</Button>
+              <Button type="submit">{isEditMode ? 'Update' : 'Add'} Toggle</Button>
             </div>
           </form>
         </div>
@@ -213,14 +246,22 @@ export function FeatureToggles({ featureId }: FeatureTogglesProps) {
             <TableCell>{toggle.group.name}</TableCell>
             <TableCell>{toggle.product.name}</TableCell>
             <TableCell>{toggle.environment.name}</TableCell>
-            <TableActions>
-              <Button
-                variant="danger"
-                onClick={() => handleDelete(toggle)}
-              >
-                Remove
-              </Button>
-            </TableActions>
+            <TableCell>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => handleEdit(toggle)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => handleDelete(toggle)}
+                >
+                  Remove
+                </Button>
+              </div>
+            </TableCell>
           </TableRow>
         ))}
       </Table>
